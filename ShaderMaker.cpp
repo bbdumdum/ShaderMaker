@@ -15,6 +15,10 @@
 //		06.03.15	Provided for revised SharedToy spec with mainImage instead of main
 //                  See ShaderToy example 4
 //					Version 1.002
+//		30.03.15	Set m_glTextureXX to zero after delete
+//					Check for incoming Texture ID change
+//					Version 1.003
+//
 //		------------------------------------------------------------
 //
 //		Copyright (C) 2015. Lynn Jarvis, Leading Edge. Pty. Ltd.
@@ -209,9 +213,9 @@ void main()
                                       
 void main(void)
 {
-    vec2 uv = 0.5*gl_FragCoord.xy / iResolution.xy;
+	vec2 uv = 0.5*gl_FragCoord.xy / iResolution.xy;
 
-    float d = length(uv);
+	float d = length(uv);
     vec2 st = uv*0.1 + 0.2*vec2(cos(0.071*iGlobalTime+d), sin(0.073*iGlobalTime-d));
 
     vec3 col = texture2D( iChannel0, st ).xyz;
@@ -499,7 +503,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 */
 
 
-
 /*
 //
 // GLSL Sandbox example 1
@@ -698,6 +701,7 @@ FFResult ShaderMaker::InitGL(const FFGLViewportStruct *vp)
 		return FF_FAIL;
 
 	// Set the viewport size
+	// Actually it has to be checked in ProcessOpenGL because it could change
 	m_vpWidth  = (float)vp->width;
 	m_vpHeight = (float)vp->height;
 
@@ -755,6 +759,13 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 		// To the host this is an effect plugin, but it can be either a source or an effect
 		// and will work without any input, so we still start up if even there is no input texture
 
+		// Set the global viewport resolution from OpenGL now for certainty
+		// It could be different to that receieved by InitGL
+		float vpdim[4];
+		glGetFloatv(GL_VIEWPORT, vpdim);
+		m_vpWidth  = vpdim[2];
+		m_vpHeight = vpdim[3];
+
 		// Is there is texture needed by the shader ?
 		if(m_inputTextureLocation >= 0 || m_inputTextureLocation1 >= 0) {
 
@@ -765,8 +776,14 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 				maxCoords = GetMaxGLTexCoords(Texture0);
 
 				// Delete the local texture if the incoming size is different
-				if((int)m_channelResolution[0][0] != Texture0.Width || (int)m_channelResolution[0][1] != Texture0.Height) {
-					if(m_glTexture0 > 0) glDeleteTextures(1, &m_glTexture0);
+				// or the texture ID has changed (30.03.15)
+				if((int)m_channelResolution[0][0] != Texture0.Width 
+				|| (int)m_channelResolution[0][1] != Texture0.Height
+				|| Texture0.Handle != m_glTexture0) {
+					if(m_glTexture0 > 0) {
+						glDeleteTextures(1, &m_glTexture0);
+						m_glTexture0 = 0; // This is needed or the local texture is not re-created in CreateRectangleTexture (30.03.15)
+					}
 				}
 
 				// Set the resolution of the first texture size
@@ -775,11 +792,11 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 
 				// For a power of two texture, the size will be different to the hardware size.
 				// The shader will not compensate for this, so we have to create another texture
-				// the same size as the resolution we set to the shader. Also the shader needs 
-				// textures created with wrapping REPEAT rather than CLAMP to edge
-				// So we create such a texture if the size changes and use it for every frame.
+				// the same size as the resolution we set to the shader.  Also the shader needs
+				// textures created with wrapping REPEAT rather than CLAMP to edge. So we ALWAYS
+				// create such a texture and use it for every frame. The texture is re-created
+				// if the size or texture ID changes 
 				CreateRectangleTexture(Texture0, maxCoords, m_glTexture0, GL_TEXTURE0, m_fbo, pGL->HostFBO);
-
 				// Now we have a local texture of the right size and type
 				// Filled with the data from the incoming Freeframe texture
 			}
@@ -788,8 +805,13 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 			if(m_inputTextureLocation1 >= 0 && pGL->numInputTextures > 1 && pGL->inputTextures[1] != NULL) {
 				Texture1 = *(pGL->inputTextures[1]);
 				maxCoords = GetMaxGLTexCoords(Texture1);
-				if((int)m_channelResolution[1][0] != Texture1.Width || (int)m_channelResolution[1][1] != Texture1.Height) {
-					if(m_glTexture1 > 0) glDeleteTextures(1, &m_glTexture1);
+				if((int)m_channelResolution[1][0] != Texture1.Width 
+				|| (int)m_channelResolution[1][1] != Texture1.Height
+				|| Texture1.Handle != m_glTexture1) {
+					if(m_glTexture1 > 0) {
+						glDeleteTextures(1, &m_glTexture1);
+						m_glTexture1 = 0;
+					}
 				}
 				// Set the channel resolution of the second texture size
 				m_channelResolution[1][0] = (float)Texture1.Width;
@@ -802,10 +824,14 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 			if(m_inputTextureLocation2 >= 0 && pGL->numInputTextures > 2 && pGL->inputTextures[2] != NULL) {
 				Texture2 = *(pGL->inputTextures[2]);
 				maxCoords = GetMaxGLTexCoords(Texture2);
-				if((int)m_channelResolution[2][0] != Texture2.Width || (int)m_channelResolution[2][1] != Texture2.Height) {
-					if(m_glTexture2 > 0) glDeleteTextures(1, &m_glTexture2);
-				}
-				// Set the channel resolution of the second texture size
+				if((int)m_channelResolution[2][0] != Texture2.Width 
+				|| (int)m_channelResolution[2][1] != Texture2.Height
+				|| Texture2.Handle != m_glTexture2) {
+					if(m_glTexture2 > 0) {
+						glDeleteTextures(1, &m_glTexture2);
+						m_glTexture2 = 0;
+					}
+				}				
 				m_channelResolution[2][0] = (float)Texture2.Width;
 				m_channelResolution[2][1] = (float)Texture2.Height;
 				CreateRectangleTexture(Texture2, maxCoords, m_glTexture2, GL_TEXTURE1, m_fbo, pGL->HostFBO);
@@ -813,11 +839,15 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 
 			if(m_inputTextureLocation3 >= 0 && pGL->numInputTextures > 3 && pGL->inputTextures[3] != NULL) {
 				Texture3 = *(pGL->inputTextures[3]);
-				maxCoords = GetMaxGLTexCoords(Texture2);
-				if((int)m_channelResolution[3][0] != Texture3.Width || (int)m_channelResolution[3][1] != Texture3.Height) {
-					if(m_glTexture3 > 0) glDeleteTextures(1, &m_glTexture3);
+				maxCoords = GetMaxGLTexCoords(Texture3);
+				if((int)m_channelResolution[3][0] != Texture3.Width 
+				|| (int)m_channelResolution[3][1] != Texture3.Height
+				|| Texture3.Handle != m_glTexture3) {
+					if(m_glTexture3 > 0) {
+						glDeleteTextures(1, &m_glTexture3);
+						m_glTexture3 = 0;
+					}
 				}
-				// Set the channel resolution of the second texture size
 				m_channelResolution[3][0] = (float)Texture3.Width;
 				m_channelResolution[3][1] = (float)Texture3.Height;
 				CreateRectangleTexture(Texture3, maxCoords, m_glTexture3, GL_TEXTURE1, m_fbo, pGL->HostFBO);
@@ -954,13 +984,15 @@ FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 		if(m_inputColourLocation >= 0)
 			m_extensions.glUniform4fARB(m_inputColourLocation, m_UserRed, m_UserGreen, m_UserBlue, m_UserAlpha);
 
+
 		// Bind a texture if the shader needs one
 		if(m_inputTextureLocation >= 0 && Texture0.Handle > 0) {
 			m_extensions.glActiveTexture(GL_TEXTURE0);
-			// For a power of two texture we will have created a local texture
-			if(m_glTexture0 > 0)
+			// Has the local texture been created
+			// TODO - it should have been always created so this logic can be changed
+			if(m_glTexture0 > 0) 
 				glBindTexture(GL_TEXTURE_2D, m_glTexture0);
-			else
+			else 
 				glBindTexture(GL_TEXTURE_2D, Texture0.Handle);
 		}
 
@@ -1523,15 +1555,11 @@ bool ShaderMaker::LoadShader(std::string shaderString) {
 				// Start the clock again to start from zero
 				StartCounter();
 
-				// printf("shader Loaded OK\n");
-
 				return true;
 
 			} // bind shader OK
 		} // compile shader OK
 		// =============================================
-
-		// printf("shader Load failed\n");
 
 		return false;
 }
@@ -1576,6 +1604,8 @@ void ShaderMaker::CreateRectangleTexture(FFGLTextureStruct Texture, FFGLTexCoord
 		m_extensions.glGenFramebuffersEXT(1, &fbo); 
 	}
 
+	// The texture ID will be zero if not created yet or if it has been deleted
+	// due to size or ID change of the incoming FreeFrame texture
 	if(glTexture == 0) {
 		glGenTextures(1, &glTexture);
 		m_extensions.glActiveTexture(texunit);
@@ -1620,7 +1650,7 @@ void ShaderMaker::CreateRectangleTexture(FFGLTextureStruct Texture, FFGLTexCoord
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// unbind the fbo
-	if(hostFbo)
+	if(hostFbo > 0)
 		m_extensions.glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, hostFbo);
 	else
 		m_extensions.glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
