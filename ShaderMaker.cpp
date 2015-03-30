@@ -7,15 +7,18 @@
 //		------------------------------------------------------------
 //		Revisions :
 //		21-01-15	Version 1.000
-//		14.02.15	added Optimus enablement export
+//		26.02.15	Changes for FFGL 1.6
+//					change DWORD to FFResult
+//					remove "Virtual" from destructor definition
+//					Changes  for port to OSX
 //					Version 1.001
-//		09.03.15	Provided for revised SharedToy spec with mainImage instead of main
+//		06.03.15	Provided for revised SharedToy spec with mainImage instead of main
 //                  See ShaderToy example 4
-//					Removed Optimus export. Proven not to work in a dll.
 //					Version 1.002
 //		------------------------------------------------------------
 //
 //		Copyright (C) 2015. Lynn Jarvis, Leading Edge. Pty. Ltd.
+//		Ported to OSX by Amaury Hazan (amaury@billaboop.com)
 //
 //		This program is free software: you can redistribute it and/or modify
 //		it under the terms of the GNU Lesser General Public License as published by
@@ -32,13 +35,14 @@
 //		--------------------------------------------------------------
 //
 //
-#include "FFGL\FFGL.h"
-#include "FFGL\FFGLLib.h"
-#include <stdio.h>
-#include <string>
-#include <time.h> // for date
 #include "ShaderMaker.h"
 
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+int (*cross_secure_sprintf)(char *, size_t, const char *,...) = sprintf_s;
+#else 
+// posix
+int (*cross_secure_sprintf)(char *, size_t, const char *, ...) = snprintf;
+#endif
 
 #define FFPARAM_SPEED       (0)
 #define FFPARAM_MOUSEX      (1)
@@ -55,25 +59,17 @@
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // +++++++++++ IMPORTANT : DEFINE YOUR PLUGIN INFORMATION HERE +++++++++++
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-// Note that Resolume shows the plugin in "Effects"
-// with the plugin name in the list rather than the name of the file.
-// If there is a duplicate Plugin ID, only the first one loaded will show up.
-
-// Magic uses the name of the file rather than the plugin name.
-// and does not take account of duplicate Plugin ID's
-
 static CFFGLPluginInfo PluginInfo ( 
 	ShaderMaker::CreateInstance,		// Create method
 	"ZZZZ",								// *** Plugin unique ID (4 chars) - this must be unique for each plugin
-	"ShaderMaker",						// *** Plugin name - make it different for each plugin
+	"Shader Maker",						// *** Plugin name - make it different for each plugin 
 	1,						   			// API major version number 													
-	000,								// API minor version number	
+	006,								// API minor version number	
 	1,									// *** Plugin major version number
-	001,								// *** Plugin minor version number
+	002,								// *** Plugin minor version number
 	FF_EFFECT,							// Plugin type is always an effect
-	"Leading Edge Pty. Ltd.",			// *** Plugin description - you can change this for your own plugin
-	"http://spout.zeal.co/"				// *** About - you can change this too - no problems
+	"Wraps ShaderToy and GLSLSandbox shaders into a FFGL plugin", // *** Plugin description - you can expand on this
+	"by Lynn Jarvis (spout.zeal.co) OSX port by Amaury Hazan (billaboop.com)"			// *** About - use your own name and details
 );
 
 
@@ -94,7 +90,7 @@ void main()
 // which uses the Stringizing operator (#) (https://msdn.microsoft.com/en-us/library/7e3a913x.aspx)
 // This converts the shader code into a string which is then used by the shader compiler on load of the plugin.
 // There are some limitations of using the stringizing operator in this way because it depends on the "#" symbol,
-// e.g. #( .. code ). Therefore there cannot be any # characters in the code itself.
+// e.g. #( .. code ), Therefore there cannot be any # characters in the code itself.
 //
 // For example it is common to see :
 //
@@ -118,13 +114,12 @@ void main()
 char *fragmentShaderCode = STRINGIFY (
 // ==================== PASTE WITHIN THESE LINES =======================
 
-/*
+
 // Red screen test shader
-void main(void) {
+/*void main(void) {
     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 
-}
-*/
+}*/
 
 
 /*
@@ -197,6 +192,7 @@ void main()
 }
 */
 
+
 /*
 //
 // Shadertoy example 2 - needs a texture input..
@@ -209,6 +205,7 @@ void main()
 // Created by inigo quilez - iq/2013
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 //
+                                      
 void main(void)
 {
     vec2 uv = 0.5*gl_FragCoord.xy / iResolution.xy;
@@ -246,6 +243,7 @@ void main(void)
 // See http://www.iquilezles.org/articles/menger/menger.htm for the full explanation of how this was done
 //
 
+                                      /*
 float maxcomp(in vec3 p ) { return max(p.x,max(p.y,p.z));}
 float sdBox( vec3 p, vec3 b )
 {
@@ -384,7 +382,7 @@ void main(void)
 //
 // Shadertoy example 4
 //
-// Example of revised specification using "mainImage" instead of "main"
+// LJ - Example of revised specification using "mainImage" instead of "main"
 // A fix can be made to include a main function right here, but it is included
 // before compilation in "LoadShader" to be consistent with "ShaderLoader"
 //
@@ -497,6 +495,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 }
 
 
+
 /*
 //
 // GLSL Sandbox example 1
@@ -581,8 +580,7 @@ void main() {
     vec3  c = m1 > m2 ? vec3(0.0, 0.05, 0.2) : vec3(0.2, 0.05, 0.0);
 	
     gl_FragColor = vec4(c*f, 1.0);
-}
-*/
+}*/
 
 /*
 //
@@ -658,11 +656,11 @@ ShaderMaker::ShaderMaker():CFreeFrameGLPlugin()
 	FILE* pCout; // should really be freed on exit 
 	AllocConsole();
 	freopen_s(&pCout, "CONOUT$", "w", stdout); 
-	printf("Shader Maker Vers 1.000\n");
+	printf("Shader Maker Vers 1.002\n");
 	printf("GLSL version [%s]\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	*/
 
-	// Input properties allow for no texture or for two textures
+	// Input properties allow for no texture or for four textures
 	SetMinInputs(0);
 	SetMaxInputs(2); // TODO - 4 inputs
 
@@ -688,7 +686,7 @@ ShaderMaker::ShaderMaker():CFreeFrameGLPlugin()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //  Methods
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-DWORD ShaderMaker::InitGL(const FFGLViewportStruct *vp)
+FFResult ShaderMaker::InitGL(const FFGLViewportStruct *vp)
 {
 	// initialize gl extensions and make sure required features are supported
 	m_extensions.Initialize();
@@ -711,10 +709,11 @@ DWORD ShaderMaker::InitGL(const FFGLViewportStruct *vp)
 
 ShaderMaker::~ShaderMaker()
 {
-
+	// Not using this but it is here just in case
 }
 
-DWORD ShaderMaker::DeInitGL()
+
+FFResult ShaderMaker::DeInitGL()
 {
 	if(bInitialized)
 		m_shader.UnbindShader();
@@ -736,7 +735,7 @@ DWORD ShaderMaker::DeInitGL()
 	return FF_SUCCESS;
 }
 
-DWORD ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
+FFResult ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 {
 	FFGLTextureStruct Texture0;
 	FFGLTextureStruct Texture1;
@@ -836,7 +835,11 @@ DWORD ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 
 		// Calculate date vars
 		time(&datime);
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 		localtime_s(&tmbuff, &datime);
+#else
+        localtime_r(&datime, &tmbuff);
+#endif
 		m_dateYear = (float)tmbuff.tm_year;
 		m_dateMonth = (float)tmbuff.tm_mon+1;
 		m_dateDay = (float)tmbuff.tm_mday;
@@ -1035,53 +1038,51 @@ DWORD ShaderMaker::ProcessOpenGL(ProcessOpenGLStruct *pGL)
 char * ShaderMaker::GetParameterDisplay(DWORD dwIndex) {
 
 	memset(m_DisplayValue, 0, 15);
-	
 	switch (dwIndex) {
 
 		case FFPARAM_SPEED:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserSpeed*100.0));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserSpeed*100.0));
 			return m_DisplayValue;
 	
 		case FFPARAM_MOUSEX:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserMouseX*m_vpWidth));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserMouseX*m_vpWidth));
 			return m_DisplayValue;
 
 		case FFPARAM_MOUSEY:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserMouseY*m_vpHeight));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserMouseY*m_vpHeight));
 			return m_DisplayValue;
 
 		case FFPARAM_MOUSELEFTX:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserMouseLeftX*m_vpWidth));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserMouseLeftX*m_vpWidth));
 			return m_DisplayValue;
 
 		case FFPARAM_MOUSELEFTY:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserMouseLeftY*m_vpHeight));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserMouseLeftY*m_vpHeight));
 			return m_DisplayValue;
 
 		case FFPARAM_RED:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserRed*256.0));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserRed*256.0));
 			return m_DisplayValue;
 
 		case FFPARAM_GREEN:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserGreen*256.0));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserGreen*256.0));
 			return m_DisplayValue;
 
 		case FFPARAM_BLUE:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserBlue*256.0));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserBlue*256.0));
 			return m_DisplayValue;
 
 		case FFPARAM_ALPHA:
-			sprintf_s(m_DisplayValue, 16, "%d", (int)(m_UserAlpha*256.0));
+			cross_secure_sprintf(m_DisplayValue, 16, "%d", (int)(m_UserAlpha*256.0));
 			return m_DisplayValue;
 
 		default:
 			return m_DisplayValue;
 	}
 	return NULL;
-
 }
 
-DWORD ShaderMaker::GetInputStatus(DWORD dwIndex)
+FFResult ShaderMaker::GetInputStatus(DWORD dwIndex)
 {
 	DWORD dwRet = FF_INPUT_NOTINUSE;
 
@@ -1119,119 +1120,98 @@ DWORD ShaderMaker::GetInputStatus(DWORD dwIndex)
 
 }
 
-
-
-DWORD ShaderMaker::GetParameter(DWORD dwIndex)
+float ShaderMaker::GetFloatParameter(unsigned int index)
 {
-	DWORD dwRet;
-
-	switch (dwIndex) {
+	switch (index) {
 
 		case FFPARAM_SPEED:
-			*((float *)(unsigned)&dwRet) = m_UserSpeed;
-			return dwRet;
+			return  m_UserSpeed;
 	
 		case FFPARAM_MOUSEX:
-			*((float *)(unsigned)&dwRet) = m_UserMouseX;
-			return dwRet;
+			return  m_UserMouseX;
 
 		case FFPARAM_MOUSEY:
-			*((float *)(unsigned)&dwRet) = m_UserMouseY;
-			return dwRet;
+			return  m_UserMouseY;
 
 		case FFPARAM_MOUSELEFTX:
-			*((float *)(unsigned)&dwRet) = m_UserMouseLeftX;
-			return dwRet;
+			return m_UserMouseLeftX;
 
 		case FFPARAM_MOUSELEFTY:
-			*((float *)(unsigned)&dwRet) = m_UserMouseLeftY;
-			return dwRet;
+			return m_UserMouseLeftY;
 
 		case FFPARAM_RED:
-			*((float *)(unsigned)&dwRet) = m_UserRed;
-			return dwRet;
+			return m_UserRed;
 
 		case FFPARAM_GREEN:
-			*((float *)(unsigned)&dwRet) = m_UserGreen;
-			return dwRet;
+			return m_UserGreen;
 
 		case FFPARAM_BLUE:
-			*((float *)(unsigned)&dwRet) = m_UserBlue;
-			return dwRet;
+			return m_UserBlue;
 
 		case FFPARAM_ALPHA:
-			*((float *)(unsigned)&dwRet) = m_UserAlpha;
-			return dwRet;
+			return m_UserAlpha;
 
 		default:
 			return FF_FAIL;
-
 	}
 }
 
-DWORD ShaderMaker::SetParameter(const SetParameterStruct* pParam)
+FFResult ShaderMaker::SetFloatParameter(unsigned int index, float value)
 {
-	bool bUserEntry = false;
-
-	if (pParam != NULL) {
-		
-		switch (pParam->ParameterNumber) {
+		switch (index) {
 
 			case FFPARAM_SPEED:
-				m_UserSpeed = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserSpeed = value;
 				break;
 
 			case FFPARAM_MOUSEX:
-				m_UserMouseX = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserMouseX = value;
 				break;
 
 			case FFPARAM_MOUSEY:
-				m_UserMouseY = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserMouseY = value;
 				break;
 
 			case FFPARAM_MOUSELEFTX:
-				m_UserMouseLeftX = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserMouseLeftX = value;
 				break;
 
 			case FFPARAM_MOUSELEFTY:
-				m_UserMouseLeftY = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserMouseLeftY = value;
 				break;
 
 			case FFPARAM_RED:
-				m_UserRed = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserRed = value;
 				break;
 
 			case FFPARAM_GREEN:
-				m_UserGreen = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserGreen = value;
 				break;
 
 			case FFPARAM_BLUE:
-				m_UserBlue = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserBlue = value;
 				break;
 
 			case FFPARAM_ALPHA:
-				m_UserAlpha = *((float *)(unsigned)&(pParam->NewParameterValue));
+				m_UserAlpha = value;
 				break;
 
 			default:
 				return FF_FAIL;
 		}
-
 		return FF_SUCCESS;
-	
-	}
-
-	return FF_FAIL;
 }
-
 
 void ShaderMaker::SetDefaults() {
 
-	elapsedTime            = 0.0;
-	startTime              = 0.0;
-	lastTime               = 0.0;
+    elapsedTime            = 0.0;
+    lastTime               = 0.0;
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 	PCFreq                 = 0.0;
 	CounterStart           = 0;
+#else
+    start = std::chrono::steady_clock::now();
+#endif
 
 	m_mouseX               = 0.5;
 	m_mouseY               = 0.5;
@@ -1291,7 +1271,7 @@ bool ShaderMaker::LoadShader(std::string shaderString) {
 		std::string stoyUniforms;
 
 		//
-		// Extra uniforms specific to ShaderMaker for both GLSL Sandbox and ShaderToy
+		// Extra uniforms specific to ShaderMaker for buth GLSL Sandbox and ShaderToy
 		// For GLSL Sandbox, the extra "inputColour" uniform has to be typed into the shader
 		//		uniform vec4 inputColour
 		static char *extraUniforms = { "uniform vec4 inputColour;\n" };
@@ -1344,7 +1324,7 @@ bool ShaderMaker::LoadShader(std::string shaderString) {
 				stoyUniforms += stoyMainFunction;
 			}
 
-			shaderString = stoyUniforms;
+			shaderString = stoyUniforms; // the final string
 		}
 	
 		// initialize gl shader
@@ -1554,23 +1534,35 @@ bool ShaderMaker::LoadShader(std::string shaderString) {
 
 void ShaderMaker::StartCounter()
 {
-    LARGE_INTEGER li;
 
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+    LARGE_INTEGER li;
 	// Find frequency
     QueryPerformanceFrequency(&li);
     PCFreq = double(li.QuadPart)/1000.0;
-
 	// Second call needed
     QueryPerformanceCounter(&li);
     CounterStart = li.QuadPart;
+#else
+    // posix c++11
+    start = std::chrono::steady_clock::now();
+#endif
 
 }
 
 double ShaderMaker::GetCounter()
 {
+
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
     LARGE_INTEGER li;
     QueryPerformanceCounter(&li);
     return double(li.QuadPart-CounterStart)/PCFreq;
+#else
+    // posix c++11
+    end = std::chrono::steady_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()/1000.;
+#endif
+    return 0;
 }
 
 void ShaderMaker::CreateRectangleTexture(FFGLTextureStruct Texture, FFGLTexCoords maxCoords, GLuint &glTexture, GLenum texunit, GLuint &fbo, GLuint hostFbo)
