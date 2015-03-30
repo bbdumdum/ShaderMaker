@@ -21,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		2DA287A70AEEFE950030A4DD /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		AC4999031AC974AB00D06428 /* ShaderMakerPluginDefinition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShaderMakerPluginDefinition.h; path = ../../ShaderMakerPluginDefinition.h; sourceTree = "<group>"; };
 		AC62BFA31A9E16ED00174CF4 /* ShaderMaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ShaderMaker.cpp; path = ../../ShaderMaker.cpp; sourceTree = "<group>"; };
 		AC62BFA51A9E170100174CF4 /* FFGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFGL.cpp; path = ../../FFGL/FFGL.cpp; sourceTree = "<group>"; };
 		AC62BFA71A9E170100174CF4 /* FFGLExtensions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFGLExtensions.cpp; path = ../../FFGL/FFGLExtensions.cpp; sourceTree = "<group>"; };
@@ -32,7 +33,7 @@
 		AC62BFB41A9E170100174CF4 /* FFGLShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFGLShader.cpp; path = ../../FFGL/FFGLShader.cpp; sourceTree = "<group>"; };
 		AC62BFBF1A9E178700174CF4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC62BFC11A9E247900174CF4 /* ShaderMaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShaderMaker.h; path = ../../ShaderMaker.h; sourceTree = "<group>"; };
-		ACB4E01C1A9268BC00E4C1D2 /* FFGLShaderMaker.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FFGLShaderMaker.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACB4E01C1A9268BC00E4C1D2 /* ShaderMaker.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShaderMaker.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,7 +61,7 @@
 		2DA285A10AEE5E480030A4DD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ACB4E01C1A9268BC00E4C1D2 /* FFGLShaderMaker.bundle */,
+				ACB4E01C1A9268BC00E4C1D2 /* ShaderMaker.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,6 +69,7 @@
 		AC62BFA11A9E16CD00174CF4 /* ShaderMaker */ = {
 			isa = PBXGroup;
 			children = (
+				AC4999031AC974AB00D06428 /* ShaderMakerPluginDefinition.h */,
 				AC62BFC11A9E247900174CF4 /* ShaderMaker.h */,
 				AC62BFA31A9E16ED00174CF4 /* ShaderMaker.cpp */,
 			);
@@ -106,7 +108,7 @@
 			);
 			name = ShaderMaker;
 			productName = FFGLBrightness;
-			productReference = ACB4E01C1A9268BC00E4C1D2 /* FFGLShaderMaker.bundle */;
+			productReference = ACB4E01C1A9268BC00E4C1D2 /* ShaderMaker.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -206,6 +208,8 @@
 					"../../FFGL-1.6",
 				);
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_PREFIX_HEADER = ../../ShaderMakerPluginDefinition.h;
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -213,7 +217,7 @@
 					OpenGL,
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = ShaderMaker;
+				PRODUCT_NAME = Momo;
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = NO;
 			};
@@ -237,6 +241,8 @@
 					"../../FFGL-1.6",
 				);
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_PREFIX_HEADER = ../../ShaderMakerPluginDefinition.h;
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				OTHER_LDFLAGS = (
@@ -244,7 +250,7 @@
 					OpenGL,
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = ShaderMaker;
+				PRODUCT_NAME = Momo;
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = NO;
 			};

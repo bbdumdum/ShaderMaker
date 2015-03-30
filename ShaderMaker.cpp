@@ -36,6 +36,7 @@
 //
 //
 #include "ShaderMaker.h"
+#include "ShaderMakerPluginDefinition.h"
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 int (*cross_secure_sprintf)(char *, size_t, const char *,...) = sprintf_s;
@@ -56,20 +57,20 @@ int (*cross_secure_sprintf)(char *, size_t, const char *, ...) = snprintf;
 
 #define STRINGIFY(A) #A
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// +++++++++++ IMPORTANT : DEFINE YOUR PLUGIN INFORMATION HERE +++++++++++
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++ IMPORTANT : DEFINE YOUR PLUGIN INFORMATION in ShaderMakerPluginDefinition.h +++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 static CFFGLPluginInfo PluginInfo ( 
 	ShaderMaker::CreateInstance,		// Create method
-	"ZZZZ",								// *** Plugin unique ID (4 chars) - this must be unique for each plugin
-	"Shader Maker",						// *** Plugin name - make it different for each plugin 
-	1,						   			// API major version number 													
-	006,								// API minor version number	
-	1,									// *** Plugin major version number
-	002,								// *** Plugin minor version number
-	FF_EFFECT,							// Plugin type is always an effect
-	"Wraps ShaderToy and GLSLSandbox shaders into a FFGL plugin", // *** Plugin description - you can expand on this
-	"by Lynn Jarvis (spout.zeal.co) OSX port by Amaury Hazan (billaboop.com)"			// *** About - use your own name and details
+	SM_PLUGIN_ID,
+    SM_PLUGIN_NAME,
+    SM_PLUGIN_API_MAJOR,
+    SM_PLUGIN_API_MINOR,
+    SM_PLUGIN_MAJOR,
+    SM_PLUGIN_MINOR,
+    FF_EFFECT,
+    SM_PLUGIN_DESCRIPTION,
+    SM_PLUGIN_ABOUT
 );
 
 
@@ -379,6 +380,8 @@ void main(void)
 }
 */
 
+                                      
+/*
 //
 // Shadertoy example 4
 //
@@ -493,6 +496,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     fragColor = vec4(col,1.0);
 }
+*/
 
 
 
@@ -582,7 +586,7 @@ void main() {
     gl_FragColor = vec4(c*f, 1.0);
 }*/
 
-/*
+
 //
 // GLSL Sandbox example 2
 //
@@ -637,7 +641,7 @@ void main( void ) {
 	gl_FragColor = vec4(vec3(.1-v,.9-v,1.-v)*w*ao,1.0);
 
 }
-*/
+
 
 // ==================== END OF SHADER CODE PASTE =======================
 
