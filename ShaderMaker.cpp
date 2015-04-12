@@ -127,7 +127,7 @@ char *fragmentShaderCode = STRINGIFY (
 }*/
 
 
-/*
+
 //
 // Shadertoy example 1
 //
@@ -195,7 +195,7 @@ void main()
     gl_FragColor= vec4(color,1.)+vec4(0.1,0.2,0.5,1.0)*(t*0.025);
 
 }
-*/
+
 
 
 /*
@@ -501,10 +501,18 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     fragColor = vec4(col,1.0);
 }
 */
-                                      
-  // "Seascape" by Alexander Alekseev aka TDM - 2014
-  // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+
   
+/*
+ 
+//
+// Shadertoy example 4
+//
+//
+// "Seascape" by Alexander Alekseev aka TDM - 2014
+// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+// https://www.shadertoy.com/view/Ms2SD1
+ 
   const int NUM_STEPS = 8;
   const float PI	 	= 3.1415;
   const float EPSILON	= 1e-3;
@@ -689,6 +697,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
       // post
       fragColor = vec4(pow(color,vec3(0.75)), 1.0);
   }
+*/
 
 
 /*

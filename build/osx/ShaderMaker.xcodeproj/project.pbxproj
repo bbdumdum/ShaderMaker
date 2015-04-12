@@ -33,7 +33,7 @@
 		AC62BFB41A9E170100174CF4 /* FFGLShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FFGLShader.cpp; path = ../../FFGL/FFGLShader.cpp; sourceTree = "<group>"; };
 		AC62BFBF1A9E178700174CF4 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AC62BFC11A9E247900174CF4 /* ShaderMaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShaderMaker.h; path = ../../ShaderMaker.h; sourceTree = "<group>"; };
-		ACB4E01C1A9268BC00E4C1D2 /* ShaderMaker.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ShaderMaker.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACB4E01C1A9268BC00E4C1D2 /* Seascape.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Seascape.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +61,7 @@
 		2DA285A10AEE5E480030A4DD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ACB4E01C1A9268BC00E4C1D2 /* ShaderMaker.bundle */,
+				ACB4E01C1A9268BC00E4C1D2 /* Seascape.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,7 +108,7 @@
 			);
 			name = ShaderMaker;
 			productName = FFGLBrightness;
-			productReference = ACB4E01C1A9268BC00E4C1D2 /* ShaderMaker.bundle */;
+			productReference = ACB4E01C1A9268BC00E4C1D2 /* Seascape.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -217,7 +217,7 @@
 					OpenGL,
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = Momo;
+				PRODUCT_NAME = "Shader Maker";
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = NO;
 			};
@@ -250,7 +250,7 @@
 					OpenGL,
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = Momo;
+				PRODUCT_NAME = "Shader Maker";
 				WRAPPER_EXTENSION = bundle;
 				ZERO_LINK = NO;
 			};
