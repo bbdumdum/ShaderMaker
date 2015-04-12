@@ -13,6 +13,12 @@ Visual Studio and change to "release", it should build OK as-is. More examples a
 In build/osx there are both and XCode project and a makefile. In both cases, the resulting bundle will be created in
 Binaries/osx. 
 
+##Linux (experimental)
+In build/linux there is a makefile for producing a .so. I haven't tested the build yet on a linux FFGL host.
+
+This makefile has been written under a Debian 8.0 (jessie) install, with GCC 4.9.2.
+On top of having a working GCC install, the following packages need to be installed: mesa-common-dev, freeglut3
+
 ##How to use
 To make your own shader plugin, all you do is copy/paste the shader code into the source file,
 change the plugin information and rename the resulting dll. There are some things to take note of, 
