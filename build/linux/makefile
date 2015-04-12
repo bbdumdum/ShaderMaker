@@ -45,3 +45,6 @@ ShaderMaker.so: $(SHADERMAKER_OBJS) $(COMMON_OBJS)
 clean:
 	rm -rf $(OBJS) *.so
 
+package:
+	mkdir -p $(DIR_BUNDLE)
+	mv ./ShaderMaker.so $(DIR_BUNDLE)
