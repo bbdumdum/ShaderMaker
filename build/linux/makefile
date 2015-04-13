@@ -19,9 +19,9 @@ OBJS = $(COMMON_OBJS) $(SHADERMAKER_OBJS)
 
 vpath %.cpp $(DIR_SRC):$(DIR_FFGL)
 
-CCPP = g++
+CCPP = clang++
 CPPFLAGS = -Wall -Wno-unknown-pragmas -pedantic \
-	-I$(DIR_SRC) -I$(DIR_FFGL) -std=c++11 -fPIC 
+	-I$(DIR_SRC) -I$(DIR_FFGL) -std=c++11 -stdlib=libc++ -fPIC 
 
 CSHLIB = $(CCPP) $(CPPFLAGS) -o $@ -shared -Wl,-soname,$@ -o $@ $^ -lc -lX11 -lGL -lglut 
 
@@ -37,9 +37,9 @@ endif
 
 .PHONY: clean
 
-all: ShaderMaker.so
+all: libShaderMaker.so
 
-ShaderMaker.so: $(SHADERMAKER_OBJS) $(COMMON_OBJS)
+libShaderMaker.so: $(SHADERMAKER_OBJS) $(COMMON_OBJS)
 	$(CSHLIB)
 
 clean:
@@ -47,4 +47,4 @@ clean:
 
 package:
 	mkdir -p $(DIR_BUNDLE)
-	mv ./ShaderMaker.so $(DIR_BUNDLE)
+	mv ./libShaderMaker.so $(DIR_BUNDLE)
