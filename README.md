@@ -17,12 +17,16 @@ make && make package
 In both cases, the resulting bundle will be created in Binaries/osx
 
 ##Linux (experimental)
-In build/linux there is a makefile for producing a .so. I haven't tested the build yet on a linux FFGL host.
+In build/linux there is a makefile for producing a .so.
 
-This makefile has been written under a Debian 8.0 (jessie) install, with GCC 4.9.2.
-On top of having a working GCC install, the following packages need to be installed: mesa-common-dev, freeglut3
+This makefile has been written under a Debian 8.0 (jessie) install, and clang.
+The following packages need to be installed: clang, mesa-common-dev, freeglut3, libc++-dev
 
-Type
+```
+sudo apt-get install clang mesa-common-dev freeglut3 libc++-dev
+```
+
+When those packages are installed you can type
 ```
 make && make package
 ```
